@@ -45,6 +45,34 @@ app.post("/api/adminsignup",async(req,res)=>{
 })
 
 
+app.post("/api/adminlogin",async(req,res)=>{
+    console.log(req.body)
+    const {email,password}=req.body;
+
+    if(!email || !password){
+        return res.send({message:"fill the details"});
+    }
+
+    const data=await adminmodel.findOne({email:email})
+    console.log(data);
+    if(!data){
+        return res.send({message:"something went wrong"});
+    }
+    else{
+        bcrypt.compare(password,data.password,(err,result)=>{
+           if(result){
+            const token=jwt.sign({email},process.env.API_SECRET,{ expiresIn:'1h'});
+            console.log(token)
+            return res.send({message:"login successfull",token:token,name:data.name})
+           }
+           else{
+            return res.send({message:"incorrect credentials"})
+           }
+        })
+    }
+})
+
+
 
 app.listen(process.env.PORT,()=>{
     console.log(`server started at http://localhost:${process.env.PORT}`);
