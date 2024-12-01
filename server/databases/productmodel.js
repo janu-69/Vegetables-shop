@@ -16,9 +16,6 @@ const productschema=mongoose.Schema({
     image:{
         type:String,
     },
-    category:{
-        type:String,
-    },
     type:{
         type:String,
     },
@@ -31,15 +28,9 @@ const productschema=mongoose.Schema({
     new_price:{
         type:Number,
     },
-    discount:{
-        type:Number,
-    },
     description:{
         type:String,
     },
-    moredetails:{
-        type:String,
-    }
 },{timestamps:true})
 
 const productmodel=new mongoose.model("products",productschema)
