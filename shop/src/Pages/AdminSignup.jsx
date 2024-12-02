@@ -14,7 +14,7 @@ const AdminSignup = () => {
     password:adminpassword
    }
    console.log(data)
-   axios.post("http://localhost:8000/api/adminsignup",data)
+   axios.post("http://localhost:9999/api/adminsignup",data)
    .then((res)=>{
     console.log(res.data)
     setadminname('');

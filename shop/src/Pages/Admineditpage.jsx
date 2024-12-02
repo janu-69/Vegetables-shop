@@ -1,74 +1,67 @@
-import React, { useState } from 'react'
-import Adminheader from './Adminheader'
+import React, { useEffect,useState } from 'react'
+import Adminheader from './Adminheader';
 import axios from "axios"
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-
-const Adminaddproduct = () => {
-const navigate=useNavigate();
-    useEffect(()=>{
-        let token=localStorage.getItem("token");
-        if(!token){
-            alert("please login agaain");
-          navigate("/adminlogin");
-        }
-      },[])
+import { useNavigate, useParams } from 'react-router-dom';
 
 
-    const [productname,setproductname]=useState('');
-    const [producttype,setproducttype]=useState('');
-    const [productstock,setproductstock]=useState('');
-    const [productoldprice,setproductoldprice]=useState('');
-    const [productnewprice,setproductnewprice]=useState('');
-    const [productdescription,setproductdescription]=useState('');
-    const [image,setimage]=useState();
+const Admineditpage = () => {
+const {id}=useParams();
+console.log(id)
 
-    const handlesubmit = (e) => {
-        e.preventDefault();
-        const headers = {
-          token: localStorage.getItem('token'),
-        };
-        if (image && productname && producttype && productdescription && productoldprice && productnewprice && productstock) {
-          let formdata = new FormData();
+  useEffect(()=>{
+    let token=localStorage.getItem("token");
+    if(!token){
+      alert("please login agaain");
+      navigate("/adminlogin");
+    }
+  },[])
+
+  const [productname,setproductname]=useState('');
+  const [producttype,setproducttype]=useState('');
+  const [productstock,setproductstock]=useState('');
+  const [productoldprice,setproductoldprice]=useState('');
+  const [productnewprice,setproductnewprice]=useState('');
+  const [productdescription,setproductdescription]=useState('');
+  const [image,setimage]=useState();
+
+  const navigate=useNavigate();
+
+  const handleedit=(e)=>{
+    e.preventDefault();
+    const headers = {
+      token: localStorage.getItem('token'),
+    };
+    let formdata = new FormData();
           formdata.append('name', productname);
           formdata.append('type', producttype);
           formdata.append('description', productdescription);
           formdata.append('old_price', productoldprice);
           formdata.append('new_price', productnewprice);
           formdata.append('stock', productstock);
-          formdata.append('image',image)
+          formdata.append('image',image);
+          formdata.append("dataid",id)
 
           console.log(formdata);
-    
-         axios.post('http://localhost:9999/api/addproducts', formdata, { headers })
-            .then((res) => {
-              console.log(res);
-              if(res.data.message==='product created'){
-                alert('product created');
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-              if(error.response.data.message==='unauthorised user'){
-                alert("token expired please login again....");
-                navigate('/adminlogin');
-              }
-              if(err.response.data.message==='token missing',{}){
-                alert("token missing please relogin");
-                navigate("/adminlogin");
-              }
-            });
-            setproductname('');
-            setproducttype('');
-            setproductstock('');
-            setproductoldprice('');
-            setproductnewprice('');
-            setproductdescription('')
-            setimage();
-        } else {
-          alert('Please fill all the product details');
-        }
-      };
+          axios.post('http://localhost:9999/api/editproducts', formdata, { headers })
+          .then((res) => {
+            console.log(res.data);
+            if(res.data==="success"){
+              alert('product updated successfullyyy...');
+              navigate("/adminhome");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            if(error.response.data.message==='unauthorised user'){
+              alert("token expired please login again....");
+              navigate('/adminlogin');
+            }
+            if(error.response.data.message==='token missing',{}){
+              alert("token missing please relogin");
+              navigate("/adminlogin");
+            }
+          });
+  }
   return (
     <>
     <Adminheader/>
@@ -111,7 +104,7 @@ const navigate=useNavigate();
         </div>
 
         <div>
-            <button className='bg-green-500 text-white px-8 py-1 rounded-md' onClick={handlesubmit}>Submit</button>
+            <button className='bg-green-500 text-white px-8 py-1 rounded-md' onClick={handleedit}>Edit Product</button>
         </div>
         </form>
     </div>
@@ -119,4 +112,4 @@ const navigate=useNavigate();
   )
 }
 
-export default Adminaddproduct
+export default Admineditpage

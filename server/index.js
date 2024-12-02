@@ -164,6 +164,64 @@ app.get("/api/allproducts",adminauth,async(req,res)=>{
 })
 
 
+app.post('/api/editproducts',adminauth,upload.single('image'),async(req,res)=>{
+    let newdata={}
+console.log(req.body);
+    if(req.file){
+        newdata['image']=req.file.filename;
+    }
+    
+    if(req.body.name){
+        newdata['name']=req.body.name;
+    }
+    
+    if(req.body.type){
+        newdata['type']=req.body.type;
+    }
+    if(req.body.description){
+        newdata['description']=req.body.description;
+    }
+    
+    if(req.body.old_price){
+        newdata['old_price']=req.body.old_price;
+    }
+
+    if(req.body.new_price){
+        newdata['new_price']=req.body.new_price;
+    }
+
+    if(req.body.stock){
+        newdata['stock']=req.body.stock;
+    }
+
+
+    let doc=await productmodel.findByIdAndUpdate(req.body.dataid,newdata,{new:true});
+    console.log(doc)
+    if(doc){
+       return res.send("success");
+
+    }
+    else{
+        return res.send("not updated");
+    }
+})
+
+app.post('/api/deleteproduct',async(req,res)=>{
+    console.log(req.body.id);
+    if(!req.body.id){
+        return res.send({message:'id not found'});
+    }
+    else{
+        const deletedProduct = await productmodel.findByIdAndDelete(req.body.id);
+        if(deletedProduct){
+            return res.send({message:"deleted"});
+        }
+        else{
+            return res.send({message:"somthing went wrong while deleting"});
+        }
+    }
+
+})
 app.listen(process.env.PORT,()=>{
     console.log(`server started at http://localhost:${process.env.PORT}`);
 })

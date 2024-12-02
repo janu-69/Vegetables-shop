@@ -17,7 +17,7 @@ const AdminLogin = () => {
 
    console.log(data)
 
-   axios.post("http://localhost:8000/api/adminlogin",data)
+   axios.post("http://localhost:9999/api/adminlogin",data)
    .then((res)=>{
     console.log(res.data)
     if(res.data.message==="fill the details"){
