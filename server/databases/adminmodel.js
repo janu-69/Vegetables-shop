@@ -3,16 +3,23 @@ const mongoose=require("mongoose");
 const adminschema=mongoose.Schema({
     name:{
         type:String,
-        required:true
     },
     email:{
         type:String,
-        required:true
+        require:[true,'provide email'],
+        unique:true
     },
     password:{
         type:String,
-        required:true
-    }
+        require:[true,'provide password']
+    },
+
+        role:{
+            type:String,
+            enum:["admin","user"],
+            default:"admin"
+        },
+        
 },{timestamps:true})
 
 const adminmodel=new mongoose.model("admin",adminschema);

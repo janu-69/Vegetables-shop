@@ -1,13 +1,15 @@
 const express=require('express');
 const cors=require('cors');
-const bcrypt=require('bcrypt')
-const jwt=require('jsonwebtoken')
-const multer=require("multer")
+const bcrypt=require('bcrypt');
+const jwt=require('jsonwebtoken');
+const multer=require("multer");
 require("dotenv").config();
-const productmodel=require("./databases/productmodel.js")
+const productmodel=require("./databases/productmodel.js");
 const adminmodel=require("./databases/adminmodel.js");
+const usermodel=require('./databases/usermodel.js');
+const ordermodel=require("./databases/orders.js");
 const cookieParser = require('cookie-parser');
-const path=require("path")
+const path=require("path");
 
 const app=express();
 
@@ -46,6 +48,40 @@ const adminauth=async(req,res,next)=>{
         }
         else{
             const data=await adminmodel.findOne({email:dass.email})
+
+            if(data){
+                next();
+            }
+            else{
+                return res.send({message:"something went wrong at auth"});
+            }
+                
+        }
+    
+        }
+
+        
+    } catch (error) {
+   return res.status(500).send({message:"unauthorised user"})
+        
+    }
+}
+const userauth=async(req,res,next)=>{
+
+    try {
+        if(!req.headers.token){
+            return res.status(403).send({message:"token missing"});
+        }
+        else{
+            const token=req.headers.token;
+            console.log(token)
+        const mass=jwt.verify(token,process.env.API_SECRET)
+        console.log(mass)
+        if(!mass){
+            return res.send({message:'something went wrong'});
+        }
+        else{
+            const data=await usermodel.findOne({email:mass.email})
 
             if(data){
                 next();
@@ -222,6 +258,65 @@ app.post('/api/deleteproduct',async(req,res)=>{
     }
 
 })
+
+app.post("/api/usersignup",async(req,res)=>{
+    console.log(req.body)
+    const {name,email,number,password}=req.body
+    if(!name || !email || !password){
+     return res.send({message:"fill all the details"})
+    }
+    const data=await usermodel.findOne({email:email})
+    console.log(data)
+    if(data){
+     return res.send({message:"user already exist"})
+    }
+    else{
+     bcrypt.genSalt(10,(err,salt)=>{
+         bcrypt.hash(password,salt,async(err,hash)=>{
+            const user=await usermodel.create({
+             name,
+             email,
+             number,
+             password:hash
+            })
+            if(user){
+             return res.send({message:"user created"})
+            }
+            else{
+             return res.send({message:"something went wrong"})
+            }
+         })
+     })
+    }
+ })
+
+app.post("/api/userlogin",async(req,res)=>{
+    console.log(req.body)
+    const {email,password}=req.body;
+
+    if(!email || !password){
+        return res.send({message:"fill the details"});
+    }
+
+    const data=await usermodel.findOne({email:email})
+    console.log(data);
+    if(!data){
+        return res.send({message:"something went wrong"});
+    }
+    else{
+        bcrypt.compare(password,data.password,(err,result)=>{
+           if(result){
+            const token=jwt.sign({email},process.env.API_SECRET,{ expiresIn:'1h'});
+            console.log(token)
+            return res.send({message:"login successfull",token:token,name:data.name})
+           }
+           else{
+            return res.send({message:"incorrect credentials"})
+           }
+        })
+    }
+})
+
 app.listen(process.env.PORT,()=>{
     console.log(`server started at http://localhost:${process.env.PORT}`);
 })
